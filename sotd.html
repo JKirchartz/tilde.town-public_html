@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>~kirch's radio</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="//tilde.town/~severak/flogiston-tui.css">
+	</head>
+<html>
+  <body>
+  <div class="flogiston-page">         
+	<div class="flogiston-article">
+	<h1>~kirch's radio</h1>
+	<p>now playing:<br><strong id="songName">?</strong><br>recommended by DJ <a id="djName" href="#">?</a></p> 
+	<div id="player"></div>
+	<hr>
+	<p>generated using <a href="https://gist.github.com/severak/1e1bf8ae603ef056ea42ce52d4fa1a5a">this script</a></p>
+	</div>
+	</div>
+
+    <script>
+	var playlist = [{"id":"iypUpv9xelg","dj":"~kirch"},{"id":"A1oxh8Z-2ko","dj":"~kirch"},{"id":"m0AKJMGxwpE","dj":"~kirch"},{"id":"HN1ygrDiq90","dj":"~kirch"},{"id":"B7UmUX68KtE","dj":"~kirch"},{"id":"fbjbGQVqj0M","dj":"~kirch"},{"id":"0tdyU_gW6WE","dj":"~kirch"},{"id":"2nKsnQsi0EQ","dj":"~kirch"},{"id":"x1U1Ue_5kq8","dj":"~kirch"},{"id":"jiH1wNmZTII","dj":"~kirch"},{"id":"tdOflj-esBA","dj":"~kirch"},{"id":"aynCgnbbgbM","dj":"~kirch"}];
+	var details = {};
+	var idList = [];
+	playlist.forEach(function(vid){
+		details[vid.id] = vid;
+		idList.push(vid.id);
+	});
+	
+	
+      
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      
+      
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '360',
+          width: '640',
+		videoId: idList.pop(),
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      
+      function onPlayerReady(event) {
+		event.target.loadPlaylist({playlist: idList});
+		event.target.playVideo();
+      }
+
+	function updateNowPlaying() {
+		var vdata = player.getVideoData();
+			document.getElementById('songName').textContent = vdata.title;
+			var dj = details[vdata.video_id]['dj']
+			document.getElementById('djName').textContent = dj;
+			document.getElementById('djName').href = 'https://tilde.town/' + dj;
+	}
+	
+      
+      
+      
+     function onPlayerStateChange(event) {
+		
+			updateNowPlaying();
+		
+      }
+    </script>
+  </body>
+</html>

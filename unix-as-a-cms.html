@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <link rel="canonical" href="https://jkirchartz.com/2018/09/unix-as-a-cms.html"/>
+  <title>kirch ~ Unix as a CMS</title>
+  <link rel="stylesheet" href="style.css">
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">Unix as a CMS</h1>
+<h3 class="date">2018-09-11 18:22 -0400</h3>
+</header>
+<p>Recently I’ve discovered the <a href="https://tilde.team/wiki/?page=other-tildes">tildeverse</a>, a loose federation of *nix servers inpired by <a href="http://tilde.club/">tilde.club</a> offering a shell account where you can host a site, play games, and participate in a community of like-minded individuals (you know, the sort who think having a unix account would be fun.) This article will show a method to create these pages more efficiently.</p>
+<p>As tradition dictates, these sites are usually hand-written html hosted in the <code>~/public_html</code> directory nested inside your home directory (for which <code>~</code> is a shortcut) this site is then accessible at <code>&lt;domain&gt;.&lt;tld&gt;/~&lt;username&gt;</code>, which all together explains the “tilde” in tildeverse.</p>
+<p>Handcoding HTML is fun, but if you’d like to make a bunch of pages without worrying about markup, <a href="https://daringfireball.net/projects/markdown/"><code>markdown</code></a> is one of the plain-text formats you might choose. <a href="https://github.com/chadbraunduin/markdown.bash">Rendering markdown can be done with pure bash</a>, but <a href="http://pandoc.org/"><code>pandoc</code></a> is more powerful - it may not be available on all systems, but the beauty of the tildeverse if you can ask your admin to install it and they probably will.</p>
+<p>Make is a program that reads a <code>Makefile</code> and follows its instructions to compile code, this may be C/C++, but here I will be using it to read a directory of markdown files and generate HTML. There are a few different versions, but here I will assume <a href="https://www.gnu.org/software/make/">Gnu Make</a> is installed. In the below script I set the shell, use <code>wildcard</code> to find all markdown files, <code>subst</code> and <code>patsubst</code> to generate a list of html files to generate, and finally an <code>all</code> directive to put the outputs together. Running <code>make</code> at the command line will take each <code>md</code> file process it with pandoc and create a <code>html</code> file, this is then moved to the appropriate <code>public_html</code> directory (which we will assume is one directory higher than where you keep your unpublished markdown files.) If you’re using <code>vim</code> as your text editor the command <code>:make</code> can also be used.</p>
+<script src="https://gist.github.com/JKirchartz/51837825945a6d1509d3f11b487a3b09.js"></script>
+<p>It is possible to tell pandoc to include certain CSS files, but providing your own template will give more control and IMHO make customization easier.</p>
+<p>Pandoc will also apply certain metadata provided in <a href="http://yaml.org/">YAML frontmatter</a> in a markdown file, and place it as defined in the above layout. None of these options are required, but show how flexible this system is.</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="fu">author:</span> &lt;Your Name&gt;
+<span class="fu">author-meta:</span> &lt;Your Name&gt;
+<span class="fu">title:</span> &lt;Document Title&gt;
+<span class="fu">subtitle:</span> &lt;Document Subtitle&gt;
+<span class="fu">lang:</span> &lt;document language attibute for html tag&gt;
+<span class="fu">date:</span> &lt;Todays Date&gt;
+<span class="fu">date-meta:</span> &lt;Todays Date&gt;
+<span class="fu">keywords:</span>
+<span class="kw">-</span> &lt;keyword 1&gt;
+<span class="kw">-</span> &lt;keyword 2&gt;
+<span class="kw">-</span> &lt;etc&gt;
+<span class="fu">css:</span>
+<span class="kw">-</span> &lt;path to css 1&gt;
+<span class="kw">-</span> &lt;etc&gt;
+<span class="fu">include-after:</span>
+<span class="kw">-</span> &lt;copyright notice&gt;
+<span class="kw">-</span> &lt;script tags&gt;
+<span class="kw">-</span> &lt;etc&gt;
+<span class="ot">---</span></code></pre></div>
+<p><a href="https://jkirchartz.com/2018/09/unix-as-a-cms.html">View this post on my blog</a></p>
+</body>
+</html>

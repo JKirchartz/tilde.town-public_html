@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>* {margin: 0; padding: 0; box-sizing: border-box;} html, body {font-family: monospace; background: #CCC; line-height:0; height: 100%; width: 100%; overflow: hidden;} span { cursor: pointer; overflow: hidden; display: inline-block; height: 16px; width: 8px; overflow: hidden; }</style>
+</head>
+<body style="-mox-user-select: none; -webkit-user-select: none; -ms-user-select: none; -o-user-select: none; user-select: none;" unselectable="on" onselectstart="return false;">
+<script>
+const charset = (function() {
+  // get all utf block elements
+  var output = "";
+  for (var i = 9600; i < 9632; i++) {
+    output += String.fromCharCode(i);
+  }
+  return output;
+})();
+const framerate = Math.round(Math.random()) ? 84 : 42; // 12 or 24 FPS
+function changeThis() {
+  if (Math.round(Math.random())) {
+    if (Math.round(Math.random())) {
+      this.innerHTML = charset[Math.floor(Math.random() * charset.length)];
+    } else {
+      var char = (charset.indexOf(this.innerHTML) + 1) % charset.length;
+      this.innerHTML = charset[char];
+    }
+  }
+  if (Math.round(Math.random())) {
+    this.style.color = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+  }
+  if (Math.round(Math.random())) {
+    this.style.background = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+  }
+}
+function init() {
+  var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+  var char_w = (w / 8) + 1;
+  var char_h = (h / 16) + 1;
+
+  var body = document.getElementsByTagName('body')[0];
+
+  for (var i = char_w * char_h; i > 0; i--) {
+    var span = document.createElement("span");
+    span.onclick = changeThis;
+    span.innerHTML = charset[Math.floor(Math.random() * charset.length)];
+    span.style.color = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+    span.style.background = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+    body.append(span);
+  }
+
+  if (Math.round(Math.random())) {
+    setTimeout(setSome, framerate);
+  } else {
+    setTimeout(setOne, framerate);
+  }
+}
+
+function setOne() {
+  var span = document.getElementsByTagName('span');
+  span = span[Math.floor(Math.random()*span.length)];
+  if (Math.round(Math.random())) {
+    if (Math.round(Math.random())) {
+      span.innerHTML = charset[Math.floor(Math.random() * charset.length)];
+    } else {
+      var char = (charset.indexOf(span.innerHTML) + 1) % charset.length;
+      span.innerHTML = charset[char];
+    }
+  }
+  if (Math.round(Math.random())) {
+    span.style.color = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+  }
+  if (Math.round(Math.random())) {
+    span.style.background = '#'+Math.floor(Math.random()*16777216).toString(16).split(-6);
+  }
+  if (Math.round(Math.random())) {
+    setTimeout(setSome, framerate);
+  } else {
+    setTimeout(setOne, framerate);
+  }
+}
+function setSome() {
+  for (var i = Math.floor(Math.random() * framerate);i > 0;i--) {
+    setOne();
+  }
+}
+init();
+window.onresize = init;
+</script>
+</body>
+</html>

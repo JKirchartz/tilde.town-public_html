@@ -1,0 +1,8 @@
+html {
+  background-color: aqua;
+  font-family: courier;
+}
+body {
+  max-width: 65em;
+  margin: 0 auto;
+}

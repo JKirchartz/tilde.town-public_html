@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <title>Kirch's Stupid ~ Tricks</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <h1>Kirch's Stupid ~ Tricks</h1>
+
+    <h3>Connect to screen without a login shell</h3>
+    <pre>
+       ssh -t tilde.town screen -r
+    </pre>
+    <p>The magic here is provided by the `-t` flag, this tells ssh to force a pseudo-tty session, and run the command (here, `screen -r`) without starting a shell. 
+    If you have OpenSSH 7.6 you can update your `.ssh/config` file to do this automatically with these lines
+    <pre>
+       Host tt
+         ServerAliveInterval 30
+         HostName tilde.town
+         RequestTTY force
+         RemoteCommand screen -r
+    </pre>
+    now you can connect directly to screen with `ssh tt`
+    </p>
+
+    <h3>Tunnel through an HTTPS connection<h3>
+        <pre>
+          ssh -tt &lt;server with HTTPS proxy&gt; -p 443 ssh -tt tildetown screen -RRD
+        </pre>
+        <p>This combines the trick above with another - basic ssh tunneling. </p>
+        <p>If you have an account on tilde.team or blinkenshell.org, each offers an https proxy - tilde.team's is located at ssh.tilde.team</p>
+
+    <h3>Ssh in from anywhere you connect to github from</h3>
+    <pre>
+      curl https://github.com/&lt;your user name&gt;.keys &gt;&gt; ~/.ssh/authorized_keys
+    </pre>
+    <p>Github stores a copy of all the SSH keys you have authorized with it, this makes it easy to add yourself (or others) to servers and anything else requiring a key.</p>
+
+
+    <h3>Remove duplicate ssh keys (without making temporary files)</h3>
+    <pre>
+      vim ~/.ssh/authorized_keys +":sort u|wq"
+    </pre>
+    <p>This tells vim to open a file and run a few commands, in this case `:sort u` to uniquely sort the file, and `wq` to write and quit vim. The `|` tells vim that these are two separate commands (like `;` in most programming languages)</p>
+
+
+  </body>
+</html>

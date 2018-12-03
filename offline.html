@@ -1,0 +1,32 @@
+<!doctype html>
+<style>
+body { background: aqua; }
+div { max-width: 45em; margin: 0 auto; }
+#offline { display: none; }
+#online { display: none; }
+</style>
+<script>
+function on() {
+    document.getElementById('online').style.display = "block";
+    document.getElementById('offline').style.display = "none";
+}
+function off() {
+    document.getElementById('offline').style.display = "block";
+    document.getElementById('online').style.display = "none";
+}
+window.onload = function() {
+  window.addEventListener("online", on);
+  window.addEventListener("offline", off);
+  (navigator.onLine ? on : off)();
+};
+</script>
+
+<div id="online">
+  <h1 style="background:black;color:white;">Please go offline to view the secret message</h1>
+  <p>The secret message is part of this page, but it's only viewable if you're not connected to the net.</p>
+</div>
+
+<div id="offline">
+  <h1>Welcome to the super-secret offline page!</h1>
+  <p>You can only view this if your computer is offline (or you're enough of a geek to discover the alternative methods)</p>
+</div>

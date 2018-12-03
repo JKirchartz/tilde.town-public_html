@@ -1,0 +1,224 @@
+<!doctype html>
+<head>
+
+  <title>Vocabularycept</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+    html, body { height: 100%; width: 100%; }
+    body { position: relative; }
+    .dropzone {
+      /* height: 3em; */
+      min-height: 3em;
+    }
+    div[draggable] { 
+      display: inline-block;
+      cursor: grab;
+    }
+    div[draggable]:active { 
+      cursor: grabbing;
+    }
+    div[draggable]::after {
+      content: attr(data-word);
+      display: inline-block;
+      padding: 0.25em;
+      margin: 0.5em;
+      border: 1px solid #EEE;
+      border-right: 1px solid #666;
+      border-bottom: 1px solid #666;
+      box-shadow: 1px 1px 3px #AAA;
+    }
+    .hovering {
+      background: #EEE;
+    }
+    @keyframes rotating {
+      from {
+        -ms-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      to {
+        -ms-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    .loading::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -2.5em;
+      margin-top: -2.5em;
+
+      content: "";
+      display: block;
+      height: 5em;
+      width: 5em;
+      border-radius: 50%;
+      border: 2px solid black;
+      border-left-color: transparent;
+      margin: auto;
+      -webkit-animation: rotating 1s linear infinite;
+      -moz-animation: rotating 1s linear infinite;
+      -ms-animation: rotating 1s linear infinite;
+      -o-animation: rotating 1s linear infinite;
+      animation: rotating 1s linear infinite;
+    }
+    .loading > * {
+      display: none;
+    }
+  </style>
+</head>
+<body class="loading">
+  <header id="header"></header>
+  <script>
+let currentlyDragging = null;
+const before = (one, two) => {
+  if (two.parentNode === one.parentNode) {
+    for (var cur = one.previousSibling; cur && cur.nodeType !== 9; cur = cur.previousSibling){
+      if (cur === two){
+        return true;
+      }
+      return false;
+    }
+  }
+};
+let observers = [];
+const observer = (mutations, observer) => {
+  document.querySelectorAll('.origin').forEach((el) => {
+    el.classList.remove('origin');
+    if (!el.hasChildNodes()) {
+      document.body.appendChild(el);
+    }
+  });
+};
+const ajax = (url, callback) => {
+  let request = new XMLHttpRequest();
+  request.onreadystatechange = () => {
+    if(request.readyState === 4) {
+      if(request.status === 200) { 
+        callback(request.responseText);
+      } else {
+        alert('an error occured fetching poems');
+      };
+    }
+  }
+  request.open('Get', url);
+  request.send();
+};
+
+try {
+  // get title
+  let linenums = 5 + Math.round(Math.random() * 13); // get poems w/ lengths of 5-18 lines
+  ajax('http://universal-cors-proxy.glitch.me/http%3A%2F%2Fpoetrydb.org%2Ftitle%2Clinecount%2F.%3B' + linenums + '%3Aabs%2Ftitle', (data) => {
+      data = JSON.parse(data);
+      title = data[Math.round(Math.random() * data.length)].title
+
+      // get poem
+      ajax('http://universal-cors-proxy.glitch.me/http%3A%2F%2Fpoetrydb.org%2Ftitle%2F' + encodeURIComponent(title) + '%3Aabs', (data) => {
+        data = JSON.parse(data);
+        data = data[Math.floor(Math.random() * data.length)];
+        document.body.classList.remove('loading');
+        var header = document.getElementById('header');
+
+        var h1 = document.createElement('h1');
+        h1.innerHTML = data.title;
+        var h2 = document.createElement('h2');
+        h2.innerHTML = data.author;
+        header.appendChild(h1);
+        header.appendChild(h2);
+
+        console.log(data.lines);
+        for (var line in data.lines) {
+          if ( data.lines[line] == '' ) {
+            continue;
+          }
+          line = data.lines[line].split(/([^a-z]+)/gi);
+          line = line.filter((el) => {
+            if (/^\s+$/.test( el ) || el.length == 0) {
+              return false;
+            }
+            return true;
+          });
+          var dropzone = document.createElement('div');
+          dropzone.setAttribute('class', 'dropzone');
+          for (var word in line) {
+            word = line[word];
+            if ( word == '' ) {
+              continue;
+            }
+            var div = document.createElement('div');
+            div.setAttribute('draggable', true);
+            // div.innerHTML = '<span>' + word + '</span>';
+            div.setAttribute('data-word',  word);
+            div.ondragstart = ( ev ) => {
+              ev.dataTransfer.effectAllowed = 'move';
+              // ev.dataTransfer.setData( 'text/plain', null );
+              ev.dataTransfer.setData( 'text/html', this.innerHTML );
+              ev.target.closest('.dropzone').classList.add('origin');
+              currentlyDragging = ev.target;
+            };
+            div.ondragover = ( ev  ) => {
+              ev.preventDefault();
+              if (before(currentlyDragging, ev.target)) {
+                // prepend
+                ev.target.parentNode.insertBefore(currentlyDragging, ev.target);
+              } else {
+                // append
+                ev.target.parentNode.insertBefore(currentlyDragging, ev.target.nextSibling);
+              }
+            }
+            dropzone.appendChild(div);
+          }
+
+          dropzone.ondragenter = dropzone.ondragover = ( ev ) => {
+            ev.preventDefault();
+            if (ev.target.classList.contains('dropzone')) {
+              ev.target.classList.add( 'hovering' );
+            }
+          };
+
+          dropzone.ondragleave = (ev) => {
+            ev.target.classList.remove( 'hovering' );
+            document.querySelectorAll('.hovering').forEach((el) => el.classList.remove( 'hovering' ));
+          };
+
+          dropzone.ondrop = ( ev ) => {
+            document.querySelectorAll('.hovering').forEach((el) => el.classList.remove( 'hovering' ));
+            // currentlyDragging.parentNode.removeChild( currentlyDragging );
+            if ( ev.target.className == 'dropzone' ) {
+              ev.target.appendChild(currentlyDragging);
+            } else {
+              if (before(currentlyDragging, ev.target)) {
+                // prepend
+                ev.target.parentNode.insertBefore(currentlyDragging, ev.target);
+              } else {
+                // append
+                ev.target.parentNode.insertBefore(currentlyDragging, ev.target.nextSibling);
+              }
+            }
+            dropzone.classList.remove( 'hovering' );
+            currentlyDragging = null;
+          };
+
+          let obs = new MutationObserver(observer);
+          obs.observe(dropzone, {childList: true});
+          observers.push(obs);
+
+          document.body.appendChild(dropzone);
+        }
+});
+});
+} catch (e) {
+  alert('Epic failure:\nPlease refresh page');
+  console.error(e);
+}
+</script>
+</body>
